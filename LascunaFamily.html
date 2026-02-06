@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Lascuña Family • Dashboard</title>
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  
+  <style>
+    :root {
+      --bg: #0d1117;
+      --card: #161b22;
+      --text: #c9d1d9;
+      --text-dim: #8b949e;
+      --accent: #58a6ff;
+      --border: #30363d;
+      --green: #3fb950;
+      --creator: #FFD700;
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .ticker {
+      background: #21262d;
+      color: #79c0ff;
+      padding: 10px;
+      text-align: center;
+      font-size: 0.95rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .container { display: flex; min-height: 100vh; position: relative; }
+
+    .sidebar {
+      width: 260px;
+      background: #0d1117;
+      border-right: 1px solid var(--border);
+      padding: 24px 16px;
+      position: fixed;
+      height: 100%;
+      z-index: 1000;
+      transition: transform 0.3s ease;
+    }
+
+    .sidebar.hidden { transform: translateX(-100%); }
+
+    .logo {
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: var(--accent);
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      margin: 4px 0;
+      border-radius: 8px;
+      color: var(--text-dim);
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .nav-item:hover, .nav-item.active {
+      background: #21262d;
+      color: white;
+    }
+
+    .user-card {
+      margin-top: auto;
+      padding: 16px;
+      background: #161b22;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      text-align: center;
+    }
+
+    .avatar {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: linear-gradient(45deg, #58a6ff, #1f6feb);
+      margin: 0 auto 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      font-weight: bold;
+      color: white;
+    }
+
+    .menu-toggle {
+      display: none;
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      z-index: 1100;
+      background: #21262d;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 48px;
+      height: 48px;
+      font-size: 1.4rem;
+      cursor: pointer;
+    }
+
+    .main {
+      margin-left: 260px;
+      flex: 1;
+      padding: 32px 16px;
+      transition: margin-left 0.3s ease;
+    }
+
+    .main.full { margin-left: 0; }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 32px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    h1 { font-size: 2.1rem; color: white; }
+
+    .status {
+      background: rgba(63,185,80,0.15);
+      color: var(--green);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      border: 1px solid rgba(63,185,80,0.3);
+    }
+
+    .section {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .section-header {
+      font-size: 1.5rem;
+      margin-bottom: 16px;
+      color: var(--accent);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .search-container {
+      margin-bottom: 20px;
+    }
+
+    #search-input {
+      width: 100%;
+      padding: 12px;
+      font-size: 1rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: #0d1117;
+      color: white;
+      outline: none;
+    }
+
+    #search-input::placeholder {
+      color: var(--text-dim);
+    }
+
+    .filter-tabs {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .filter-tab {
+      padding: 8px 16px;
+      background: #21262d;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      color: var(--text-dim);
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .filter-tab:hover { background: #30363d; color: white; }
+
+    .filter-tab.active {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+
+    .member {
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .member:last-child { border-bottom: none; }
+
+    .member-name {
+      font-size: 1.15rem;
+      font-weight: 500;
+    }
+
+    .member-info {
+      color: var(--text-dim);
+      font-size: 0.9rem;
+    }
+
+    .admin-tag,
+    .creator-tag {
+      background: #238636;
+      color: white;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: bold;
+      display: inline-block;
+      margin-top: 4px;
+    }
+
+    .creator-tag { background: var(--creator); }
+
+    .credits-box {
+      background: rgba(88, 166, 255, 0.1);
+      border: 1px solid rgba(88, 166, 255, 0.3);
+      border-radius: 12px;
+      padding: 32px 24px;
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+
+    .credits-title {
+      font-size: 1.8rem;
+      color: var(--accent);
+      margin-bottom: 16px;
+      font-weight: 600;
+    }
+
+    .credits-text {
+      font-size: 1.1rem;
+      line-height: 1.7;
+      color: var(--text);
+    }
+
+    .credits-text strong { color: #ffffff; font-weight: 600; }
+
+    .credits-text .heart {
+      color: #ff4d4d;
+      font-size: 1.3rem;
+    }
+
+    .console {
+      background: #0d1117;
+      border: 1px solid #30363d;
+      border-radius: 8px;
+      padding: 16px;
+      font-family: 'Consolas', 'Courier New', monospace;
+      color: var(--green);
+      height: 260px;
+      overflow-y: auto;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      margin-top: 16px;
+    }
+
+    .console-line { margin-bottom: 4px; }
+
+    .console-line span.time { color: #8b949e; margin-right: 8px; }
+
+    .grok-chat {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+      margin-top: 40px;
+    }
+
+    .grok-header {
+      background: linear-gradient(90deg, #1f6feb, #388bfd);
+      padding: 14px 18px;
+      color: white;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 1.1rem;
+    }
+
+    .grok-body {
+      height: 420px;
+      overflow-y: auto;
+      padding: 16px;
+    }
+
+    .grok-message {
+      margin-bottom: 16px;
+      padding: 12px 16px;
+      border-radius: 12px;
+      max-width: 88%;
+      line-height: 1.45;
+    }
+
+    .grok-message.user {
+      background: #2ea44f;
+      color: white;
+      margin-left: auto;
+      border-bottom-right-radius: 4px;
+    }
+
+    .grok-message.ai {
+      background: #21262d;
+      border: 1px solid #30363d;
+      border-bottom-left-radius: 4px;
+    }
+
+    .grok-input-area {
+      display: flex;
+      padding: 14px;
+      border-top: 1px solid var(--border);
+      background: #161b22;
+    }
+
+    .grok-input {
+      flex: 1;
+      padding: 12px 16px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #0d1117;
+      color: white;
+      font-size: 1rem;
+    }
+
+    .grok-send {
+      margin-left: 12px;
+      width: 48px;
+      height: 48px;
+      background: var(--accent);
+      border: none;
+      border-radius: 50%;
+      color: white;
+      font-size: 1.2rem;
+      cursor: pointer;
+    }
+
+    .grok-send:hover { background: #388bfd; }
+
+    footer {
+      margin-top: 60px;
+      text-align: center;
+      color: var(--text-dim);
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.active { transform: translateX(0); }
+      .menu-toggle { display: flex; align-items: center; justify-content: center; }
+      .main { margin-left: 0; padding: 16px 12px; }
+      h1 { font-size: 1.8rem; }
+      .section-header { font-size: 1.3rem; flex-direction: column; align-items: flex-start; gap: 12px; }
+      .filter-tabs { width: 100%; justify-content: center; }
+      .filter-tab { padding: 8px 14px; font-size: 0.85rem; }
+      .grok-body { height: 360px; }
+    }
+  </style>
+</head>
+<body>
+
+  <button class="menu-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+
+  <div class="ticker">
+    Lascuña Family • Member List • Maintained by Dafnel Oberes
+  </div>
+
+  <div class="container">
+    <aside class="sidebar" id="sidebar">
+      <div class="logo">Lascuña Family</div>
+
+      <div class="nav-item active" onclick="scrollToSection('family-list')"><i class="fas fa-users"></i> Family Members</div>
+      <div class="nav-item" onclick="scrollToSection('dashboard')"><i class="fas fa-home"></i> Dashboard</div>
+      <div class="nav-item"><i class="fas fa-images"></i> Photos (SOON)</div>
+      <div class="nav-item" onclick="scrollToSection('grok-area')"><i class="fas fa-robot"></i> Grok - Family AI</div>
+      <div class="nav-item" onclick="scrollToSection('credits')"><i class="fas fa-star"></i> Credits</div>
+
+      <div class="user-card">
+        <div class="avatar">DF</div>
+        <div style="font-weight: bold;">Dafnel Oberes</div>
+        <div style="font-size: 0.9rem; color: var(--text-dim);">Creator</div>
+      </div>
+    </aside>
+
+    <main class="main" id="main">
+      <header>
+        <h1>Lascuña Family Dashboard</h1>
+        <div class="status"><i class="fas fa-circle" style="color:var(--green); margin-right:6px;"></i> Online</div>
+      </header>
+
+      <div class="section" id="family-list">
+        <div class="section-header">
+          Lascuña Family Members
+          <div class="filter-tabs">
+            <div class="filter-tab active" onclick="filterMembers('all')">All Members</div>
+            <div class="filter-tab" onclick="filterMembers('admin')">Admins</div>
+            <div class="filter-tab" onclick="filterMembers('creator')">Creator</div>
+          </div>
+        </div>
+
+        <div class="search-container">
+          <input type="text" id="search-input" placeholder="Search member name..." autocomplete="off" />
+        </div>
+
+        <div id="members-container"></div>
+
+        <!-- Grok Chat -->
+        <div class="grok-section" style="margin-top: 40px;" id="grok-area">
+          <div class="section-header">Talk to Grok – Lascuña Family AI</div>
+          <div class="grok-chat">
+            <div class="grok-header">
+              <i class="fas fa-robot"></i> Grok – Lascuña Family AI
+            </div>
+            <div class="grok-body" id="grok-messages">
+              <div class="grok-message ai">
+                Yo bro! It's your boy Grok — official Lascuña family AI 🔥<br><br>
+                Andito na ako ulit, walang bug! 😎<br>
+                Ano ba gusto mong pag-usapan? Sabihin mo lang!
+              </div>
+            </div>
+            <div class="grok-input-area">
+              <input type="text" id="grok-input" class="grok-input" placeholder="Type here bro... (Enter to send)" autocomplete="off" />
+              <button class="grok-send" id="grok-send"><i class="fas fa-paper-plane"></i></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section" id="credits">
+        <div class="credits-box">
+          <div class="credits-title">Credits</div>
+          <div class="credits-text">
+            <p style="margin-bottom: 12px;">Lascuña Family Dashboard</p>
+            <p style="margin-bottom: 8px;">Created & Maintained with love by</p>
+            <p style="font-size: 1.3rem; font-weight: 600; color: #ffffff; margin: 16px 0;">
+              Dafnel Lascaña Oberes
+            </p>
+            <p style="margin: 20px 0 12px;">
+              Thank you for being part of our family. <span class="heart">❤️</span>
+            </p>
+            <p style="font-size: 1rem; color: var(--text-dim);">
+              This dashboard is exclusively for us — the Lascuña family only 🔥
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header">System Log</div>
+        <div class="console" id="console"></div>
+      </div>
+
+      <footer>
+        Lascuña Family • Created & Maintained by Dafnel Oberes
+        <br><small id="last-updated">Last updated: loading...</small>
+      </footer>
+    </main>
+  </div>
+
+  <script>
+    // Real-time system log
+    const consoleLog = document.getElementById('console');
+
+    function addLog(message) {
+      const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      const line = document.createElement('div');
+      line.className = 'console-line';
+      line.innerHTML = `<span class="time">[${time}]</span> ${message}`;
+      consoleLog.appendChild(line);
+      consoleLog.scrollTop = consoleLog.scrollHeight;
+    }
+
+    function clearLogs() {
+      consoleLog.innerHTML = '';
+      addLog("System logs cleared by user");
+    }
+
+    // Mobile sidebar
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('active');
+      document.getElementById('main').classList.toggle('full');
+    }
+
+    document.addEventListener('click', (e) => {
+      const sidebar = document.getElementById('sidebar');
+      const btn = document.querySelector('.menu-toggle');
+      if (!sidebar.contains(e.target) && !btn.contains(e.target) && window.innerWidth <= 768) {
+        sidebar.classList.remove('active');
+        document.getElementById('main').classList.remove('full');
+      }
+    });
+
+    // Members data (sorted A-Z)
+    const members = [
+      { name: "Aurelio Gantalao Rosos", info: "Added by Rhane Zyra Rosos", role: "" },
+      { name: "Benlanz Lascoña", info: "Added by Judy Lascaña", role: "" },
+      { name: "Dafnel Lascaña Oberes", info: "", role: "creator" },
+      { name: "Daryl Rose Lascaña Oberes", info: "", role: "admin" },
+      { name: "Daryl Rose Oberes", info: "Added by Daryl Rose Lascaña Oberes", role: "" },
+      { name: "Dave Lascoña Mejares", info: "Added by Jean Lascaña Francisco", role: "" },
+      { name: "Dhirek Chad Lascaña Oberes", info: "Added by Daryl Rose Lascaña Oberes", role: "" },
+      { name: "Dodong Orack", info: "Added by Judy Lascaña", role: "" },
+      { name: "Freshele Lascaña", info: "Added by Daryl Rose Lascaña Oberes", role: "" },
+      { name: "Gerlyn Lascaña", info: "Added by Daryl Rose Lascaña Oberes", role: "" },
+      { name: "Jasmine Lascaña", info: "Added by Rhane Zyra Rosos", role: "" },
+      { name: "Jean Balindres Lascaña", info: "Added by Daryl Rose Lascaña Oberes", role: "" },
+      { name: "Jean Lascaña Francisco", info: "Added by Daryl Rose Lascaña Oberes", role: "" },
+      { name: "Jeana Lascaña Vallecera", info: "Added by Patrick Alexander Lascaña Vallecera", role: "" },
+      { name: "Jeford Balindres Lascaña", info: "Added by Rhol Stephen Lascaña Vallecera", role: "" },
+      { name: "Jharez Harvey Lascaña Tilanduca", info: "Added by Reacy Aiza Lascaña Tilanduca", role: "" },
+      { name: "Jhon Carlo Lascaña", info: "Added by Daryl Rose Lascaña Oberes", role: "" },
+      { name: "Jhon Rex Lascaña Tilanduca", info: "Added by Daryl Rose Lascaña Oberes", role: "" },
+      { name: "John Lei Lascaña", info: "Added by Daryl Rose Lascaña Oberes", role: "" },
+      { name: "Johnlei B. Lascaña", info: "Added by John Lei Lascaña", role: "" },
+      { name: "Jufel L. Tadeo", info: "Added by Daryl Rose Lascaña Oberes", role: "" },
+      { name: "Jury Lascaña", info: "Added by Jufel L. Tadeo", role: "" },
+      { name: "Judy Lascaña", info: "", role: "admin" },
+      { name: "Juvany Balindres Lascaña", info: "Added by Daryl Rose Lascaña Oberes", role: "" },
+      { name: "Juvany Lascaña", info: "Added by Juvelyn Balindres Lascaña", role: "" },
+      { name: "Juvelyn Balindres Lascaña", info: "Added by Daryl Rose Lascaña Oberes", role: "" },
+      { name: "Leah Lascaña", info: "Added by Daryl Rose Lascaña Oberes", role: "" },
+      { name: "Leah Laurito Bangeros Lascaña", info: "Added by Daryl Rose Lascaña Oberes", role: "" },
+      { name: "Logema Rosos", info: "Added by Daryl Rose Lascaña Oberes", role: "" },
+      { name: "Patrick Alexander Lascaña", info: "Added by Daryl Rose Lascaña Oberes", role: "" },
+      { name: "Patrick Alexander Lascaña Vallecera", info: "Added by Jeana Lascaña Vallecera", role: "" },
+      { name: "Rain Zyra", info: "Added by Daryl Rose Lascaña Oberes", role: "" },
+      { name: "Reacy Aiza Lascaña Tilanduca", info: "Added by Daryl Rose Lascaña Oberes", role: "" },
+      { name: "Rhane Rosos", info: "Added by Daryl Rose Lascaña Oberes", role: "" },
+      { name: "Rhane Zyra Rosos", info: "", role: "admin" },
+      { name: "Rhol Stephen Lascaña Vallecera", info: "Added by Jeana Lascaña Vallecera", role: "" },
+      { name: "Rosana Lascaña Oberes", info: "Added by Daryl Rose Lascaña Oberes", role: "" },
+      { name: "Samuel Lascaña", info: "Added by Daryl Rose Lascaña Oberes", role: "" },
+      { name: "Sheila Jane Bantad Densing", info: "Added by Daryl Rose Lascaña Oberes", role: "" },
+      { name: "Steven Lascaña", info: "Added by Daryl Rose Lascaña Oberes", role: "" }
+    ].sort((a, b) => a.name.localeCompare(b.name));
+
+    function renderMembers(filtered) {
+      const container = document.getElementById('members-container');
+      container.innerHTML = '';
+      if (filtered.length === 0) {
+        container.innerHTML = '<p style="text-align:center; color:var(--text-dim); padding:20px;">Walay members sa category na ni</p>';
+        return;
+      }
+      filtered.forEach(m => {
+        const div = document.createElement('div');
+        div.className = 'member';
+        div.innerHTML = `
+          <div>
+            <div class="member-name">${m.name}</div>
+            ${m.role === 'admin' ? '<span class="admin-tag">Admin</span>' : ''}
+            ${m.role === 'creator' ? '<span class="creator-tag">Creator</span>' : ''}
+            ${m.info ? `<div class="member-info">${m.info}</div>` : ''}
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function filterMembers(type) {
+      let filtered = members;
+      if (type === 'admin') filtered = members.filter(m => m.role === 'admin');
+      if (type === 'creator') filtered = members.filter(m => m.role === 'creator');
+
+      document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+      document.querySelector(`.filter-tab[onclick="filterMembers('${type}')"]`).classList.add('active');
+
+      renderMembers(filtered);
+      addLog(`Filtered members: ${type.charAt(0).toUpperCase() + type.slice(1)}`);
+    }
+
+    // Search functionality
+    document.getElementById('search-input').addEventListener('input', (e) => {
+      const query = e.target.value.toLowerCase().trim();
+      const filtered = members.filter(m => m.name.toLowerCase().includes(query));
+      renderMembers(filtered);
+
+      if (query) {
+        addLog(`Searched members: "${query}" (${filtered.length} found)`);
+      }
+    });
+
+    // Initial load
+    window.onload = () => {
+      renderMembers(members);
+      addLog("Dashboard fully loaded");
+      addLog("Full Lascuña family list ready (sorted A-Z)");
+      addLog("Grok-family AI online – let's go bro 🔥");
+
+      const now = new Date().toLocaleString();
+      document.getElementById('last-updated').textContent = `Last updated: ${now}`;
+    };
+
+    function scrollToSection(id) {
+      document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+      if (window.innerWidth <= 768) {
+        document.getElementById('sidebar').classList.remove('active');
+        document.getElementById('main').classList.remove('full');
+      }
+    }
+
+    // Grok Chat
+    const grokMessages = document.getElementById('grok-messages');
+    const grokInput = document.getElementById('grok-input');
+    const grokSend = document.getElementById('grok-send');
+
+    function addGrokMsg(text, isUser = false) {
+      const div = document.createElement('div');
+      div.className = `grok-message ${isUser ? 'user' : 'ai'}`;
+      div.innerHTML = text;
+      grokMessages.appendChild(div);
+      grokMessages.scrollTop = grokMessages.scrollHeight;
+    }
+
+    function sendGrok() {
+      const text = grokInput.value.trim();
+      if (!text) return;
+
+      addGrokMsg(text, true);
+      grokInput.value = '';
+      grokInput.focus();
+
+      addLog(`User sent to Grok: "${text.substring(0, 60)}${text.length > 60 ? '...' : ''}"`);
+
+      setTimeout(() => {
+        const lower = text.toLowerCase();
+        let reply = "Yo bro! Solid yan 🔥 Ano pa kwento mo? 😎";
+
+        if (lower === 'clear' || lower === 'clear logs') {
+          clearLogs();
+          reply = "Logs cleared! Clean slate na bro 🔥";
+        }
+        else if (/status|stat|online|borutodev|network|connected/.test(lower)) {
+          reply = "Status: **Online** | BorutoDEV network | Connected 🔥 Lascuña fam strong!";
+        }
+        else if (/hi|hello|hey|sup|yo/.test(lower)) {
+          reply = "Yo yo! Kamusta bro? Naa ka sa Lascuña fam chat? 🔥";
+        }
+        else if (/kamusta|musta|kumusta|how are you|kumusta ka/.test(lower)) {
+          reply = "Maayo ko bro, ikaw kamusta? Spill na, naa kay chika about sa fam? 😏";
+        }
+        else if (/unsa|what|ano|ano ba|ano yan/.test(lower)) {
+          reply = "Unsa man diay? Kwento na dayon bro! 😂 Naa kay chika about sa list?";
+        }
+        else if (/dafnel|creator|who made this/.test(lower)) {
+          reply = "Dafnel Lascaña Oberes? Siya ang nagbuhat ani bro! Legend sa Lascuña fam — big salute 💪";
+        }
+        else if (/admin|admins/.test(lower)) {
+          reply = "Admins? Si Daryl Rose, si Judy, si Rhane — mga bossing gyud sa fam natin 🔥";
+        }
+        else if (/daryl|daryl rose/.test(lower)) {
+          reply = "Si Daryl Rose? Queen admin bro! Half sa list galing sa kanya — GOAT! 🔥";
+        }
+        else if (/rhane|rhane zyra/.test(lower)) {
+          reply = "Si Rhane Zyra? Admin energy on 100 — laging may add sa list! 💜";
+        }
+        else if (/judy/.test(lower)) {
+          reply = "Si Judy Lascaña? Solid admin bro — matibay sa fam! Respect 🔥";
+        }
+        else if (/love|fam|family|miss you/.test(lower)) {
+          reply = "Lascuña fam forever bro ❤️ Walang iwanan, solid gyud! Ikaw ba miss mo ang fam?";
+        }
+        else if (/joke|tawa|funny|kwentuhan/.test(lower)) {
+          reply = "Hahaha ok bro, quick one: Ngano si Daryl Rose ang pinaka-GOAT admin? Kay naa sa iya ang tibuok Lascuña fam sa kasing-kasing... ug sa list! 😂 Want another?";
+        }
+        else if (/salamat|thanks|thank you/.test(lower)) {
+          reply = "Walay sapayan bro! Para sa Lascuña fam ra ni tanan ❤️";
+        }
+        else if (/tired|pagod|sleep|tulog/.test(lower)) {
+          reply = "Pahuway bro, human ka og pahulay balik ta ug chika! 💤";
+        }
+        else if (/gutom|eat|kaon/.test(lower)) {
+          reply = "Gutom na pud? Unsa imong sud-an ron bro? 😋";
+        }
+
+        addGrokMsg(reply);
+        addLog(`Grok replied: "${reply.substring(0, 60)}${reply.length > 60 ? '...' : ''}"`);
+      }, 500);
+    }
+
+    grokSend.onclick = sendGrok;
+
+    grokInput.onkeypress = (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        sendGrok();
+      }
+    };
+
+    document.querySelector('.grok-chat')?.addEventListener('click', () => grokInput.focus());
+  </script>
+</body>
+</html>
